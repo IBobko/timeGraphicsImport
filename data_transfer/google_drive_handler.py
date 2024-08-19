@@ -1,4 +1,4 @@
-from google_service_auth import GoogleServiceAuth
+from auth.google_service_auth import GoogleServiceAuth
 import googleapiclient.discovery
 
 
