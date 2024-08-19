@@ -1,11 +1,8 @@
-import argparse
-import colorsys
-import time
 import pandas as pd
-
-from excel_data_handler import ExcelDataHandler
-from google_sheets_handler import GoogleSheetsHandler
-from google_service_auth import GoogleServiceAuth
+import time
+import colorsys
+from .excel_data_handler import ExcelDataHandler
+from .google_sheets_handler import GoogleSheetsHandler
 
 
 class DataTransferManager:
@@ -119,45 +116,3 @@ class DataTransferManager:
 
         except Exception as e:
             print("An error occurred:", e)
-
-
-# Command-line interface
-def main():
-    parser = argparse.ArgumentParser(description="Excel and Google Sheets data management.")
-    subparsers = parser.add_subparsers(title='commands', description='valid commands', help='additional help')
-
-    import_parser = subparsers.add_parser('import', help='Import data to Google Sheets')
-    import_parser.add_argument("--excel_file_path", help="Path to the Excel file.", required=True)
-    import_parser.add_argument("--spreadsheet_id", help="Google Sheets spreadsheet ID.", required=True)
-    import_parser.set_defaults(func=run_import)
-
-    compare_parser = subparsers.add_parser('compare', help='Compare two Excel files')
-    compare_parser.add_argument("--excel_file_path1", help="Path to the first Excel file.", required=True)
-    compare_parser.add_argument("--excel_file_path2", help="Path to the second Excel file.", required=True)
-    compare_parser.set_defaults(func=run_compare)
-
-    args = parser.parse_args()
-    if hasattr(args, 'func'):
-        args.func(args)
-    else:
-        parser.print_help()
-
-
-def run_import(args):
-    auth = GoogleServiceAuth()
-    manager = DataTransferManager(excel_file_path=args.excel_file_path, spreadsheet_id=args.spreadsheet_id, auth=auth)
-    manager.clear_google_sheets_range('Sheet1!A4:L')
-    # Transfer data from "Events" sheet in Excel to "Sheet1!A1:C10" in Google Sheets
-    manager.transfer_events_to_sheets()
-    # Transfer data from "Periods" sheet in Excel to "Sheet1!A1:C10" in Google Sheets
-    manager.transfer_periods_to_sheets()
-
-
-def run_compare(args):
-    print("compare")
-    DataTransferManager.compare_excel_files(args.excel_file_path1, args.excel_file_path2, 'Events')
-    DataTransferManager.compare_excel_files(args.excel_file_path1, args.excel_file_path2, 'Periods')
-
-
-if __name__ == "__main__":
-    main()

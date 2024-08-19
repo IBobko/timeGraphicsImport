@@ -1,12 +1,12 @@
 import unittest
 
-from excel_data_handler import ExcelDataHandler
+from data_transfer.excel_data_handler import ExcelDataHandler
 
 
 class TestExcelDataHandler(unittest.TestCase):
     def setUp(self):
         """Set up the test environment with the real Excel file."""
-        self.excel_file_path = 'test_file.xlsx'
+        self.excel_file_path = '../test_file.xlsx'
         self.handler = ExcelDataHandler(self.excel_file_path)
 
     def test_get_sheet_names(self):

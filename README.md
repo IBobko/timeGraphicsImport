@@ -46,7 +46,7 @@ For managing sensitive information such as API keys, a .env file is used. Create
 the project with the following content:
 
 ```plaintext
-GOOGLE_API_CREDENTIALS_PATH=/media/nox/Samsung_T5/credentials.json
+GOOGLE_API_SERVICE_CREDENTIALS_PATH=/media/nox/Samsung_T5/credentials_service.json
 ```
 
 Replace the path with the actual path to your credentials.json file.
@@ -56,7 +56,7 @@ Replace the path with the actual path to your credentials.json file.
 To run the project, use the appropriate script or command, depending on your use case:
 
 ```bash
-python data_transfer.py import --excel_file_path '/home/nox/Девяностые СССР-РФ.xlsx' --spreadsheet_id '1cWsqTIX1TUR5dQoINP5NhBSV--uHHQaFSbf_RJg5omE'
+python main.py import --excel_file_path '/home/nox/Девяностые СССР-РФ.xlsx' --spreadsheet_id '1cWsqTIX1TUR5dQoINP5NhBSV--uHHQaFSbf_RJg5omE'
 
 ```
 
