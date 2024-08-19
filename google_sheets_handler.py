@@ -139,6 +139,23 @@ class GoogleSheetsHandler:
             valueInputOption='RAW', insertDataOption='INSERT_ROWS', body=append_body).execute()
         print(f"{result.get('updates').get('updatedCells')} cells appended.")
 
+    def list_excel_files(self):
+        """List all Excel files in the user's Google Drive."""
+        query = "mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' or mimeType='application/vnd.ms-excel'"
+        results = self.service.files().list(
+            q=query,
+            pageSize=10,  # Adjust the size to list more or fewer files
+            fields="nextPageToken, files(id, name)"
+        ).execute()
+
+        items = results.get('files', [])
+        if not items:
+            print('No Excel files found.')
+        else:
+            print('Excel files:')
+            for item in items:
+                print(f"{item['name']} (ID: {item['id']})")
+
 
 # Usage example
 if __name__ == "__main__":
@@ -146,11 +163,13 @@ if __name__ == "__main__":
 
     sheets_handler = GoogleSheetsHandler(spreadsheet_id)
 
+    sheets_handler.list_excel_files();
+
     # Example 1: Reading data
-    sheets_handler.read_data('Sheet1!A1:C2')
+    # sheets_handler.read_data('Sheet1!A1:C2')
 
     # Clear data from a specific range
-    sheets_handler.clear_data('Sheet1!A4:L')
+    # sheets_handler.clear_data('Sheet1!A4:L')
 
     # Example 2: Updating data
     # sheets_handler.update_data('Sheet1!B4', ['Updated Description'])

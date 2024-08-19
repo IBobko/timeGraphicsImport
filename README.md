@@ -2,7 +2,8 @@
 
 ## Description
 
-This project is designed to work with the Google Sheets API for managing data within spreadsheets. The project is built with Python and uses libraries such as `pandas`, `google-auth`, `google-api-python-client`, and others.
+This project is designed to work with the Google Sheets API for managing data within spreadsheets. The project is built
+with Python and uses libraries such as `pandas`, `google-auth`, `google-api-python-client`, and others.
 
 ## Setup
 
@@ -41,7 +42,8 @@ pip freeze > requirements.txt
 
 ### Create a .env File
 
-For managing sensitive information such as API keys, a .env file is used. Create a .env file in the root directory of the project with the following content:
+For managing sensitive information such as API keys, a .env file is used. Create a .env file in the root directory of
+the project with the following content:
 
 ```plaintext
 GOOGLE_API_CREDENTIALS_PATH=/media/nox/Samsung_T5/credentials.json
@@ -54,7 +56,8 @@ Replace the path with the actual path to your credentials.json file.
 To run the project, use the appropriate script or command, depending on your use case:
 
 ```bash
-python data_transfer.py
+python data_transfer.py import --excel_file_path '/home/nox/Девяностые СССР-РФ.xlsx' --spreadsheet_id '1cWsqTIX1TUR5dQoINP5NhBSV--uHHQaFSbf_RJ'
+
 ```
 
 Make sure to activate your virtual environment before running any scripts.
