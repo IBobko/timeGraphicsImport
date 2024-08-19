@@ -1,2 +1,9 @@
+# Ignore environment and credentials files
 .env
 credentials.json
+
+# Ignore Python virtual environment
+venv/
+
+# Ignore IDE-specific files
+.idea/
