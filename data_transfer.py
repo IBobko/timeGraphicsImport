@@ -1,17 +1,17 @@
 import argparse
 import colorsys
 import time
-
 import pandas as pd
 
 from excel_data_handler import ExcelDataHandler
 from google_sheets_handler import GoogleSheetsHandler
+from google_service_auth import GoogleServiceAuth
 
 
 class DataTransferManager:
-    def __init__(self, excel_file_path, spreadsheet_id):
+    def __init__(self, excel_file_path, spreadsheet_id, auth):
         self.excel_handler = ExcelDataHandler(excel_file_path)
-        self.sheets_handler = GoogleSheetsHandler(spreadsheet_id)
+        self.sheets_handler = GoogleSheetsHandler(auth, spreadsheet_id)
 
     @staticmethod
     def get_cleaned_value(row, column_name):
@@ -95,8 +95,30 @@ class DataTransferManager:
         self.sheets_handler.clear_data_and_formatting(google_sheets_range)
 
     @classmethod
-    def compare_excel_files(cls, excel_file_path1, excel_file_path2):
-        pass
+    def compare_excel_files(cls, excel_file_path1, excel_file_path2, sheet_name):
+        """Compares sheets with the same name from two Excel files and prints added rows."""
+        try:
+            # Загружаем данные из Excel-файлов
+            data1 = pd.read_excel(excel_file_path1, sheet_name=sheet_name)
+            data2 = pd.read_excel(excel_file_path2, sheet_name=sheet_name)
+
+            # Сброс индексов, если порядок строк не важен
+            data1.reset_index(drop=True, inplace=True)
+            data2.reset_index(drop=True, inplace=True)
+
+            # Получаем строки, которые есть в data2, но нет в data1
+            merged = data2.merge(data1, indicator=True, how='outer')
+            added_rows = merged[merged['_merge'] == 'left_only']
+
+            # Выводим информацию о добавленных строках
+            if not added_rows.empty:
+                print("Added rows:")
+                print(added_rows)
+            else:
+                print("No rows have been added.")
+
+        except Exception as e:
+            print("An error occurred:", e)
 
 
 # Command-line interface
@@ -122,14 +144,15 @@ def main():
 
 
 def run_import(args):
-    manager = DataTransferManager(excel_file_path=args.excel_file_path, spreadsheet_id=args.spreadsheet_id)
+    auth = GoogleServiceAuth()
+    manager = DataTransferManager(excel_file_path=args.excel_file_path, spreadsheet_id=args.spreadsheet_id, auth=auth)
     manager.clear_google_sheets_range('Sheet1!A4:L')
 
 
 def run_compare(args):
     print("compare")
-    # manager = DataTransferManager(file_path1=args.excel_file_path1, file_path2=args.excel_file_path2)
-    # manager.compare_files()
+    DataTransferManager.compare_excel_files(args.excel_file_path1, args.excel_file_path2, 'Events')
+    DataTransferManager.compare_excel_files(args.excel_file_path1, args.excel_file_path2, 'Periods')
 
 
 if __name__ == "__main__":

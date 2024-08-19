@@ -1,24 +1,15 @@
-import os
-import google_auth_oauthlib.flow
+from google_service_auth import GoogleServiceAuth
 import googleapiclient.discovery
-from dotenv import load_dotenv
 
 
 class GoogleDriveHandler:
-    def __init__(self):
-        load_dotenv()
-        self.CLIENT_SECRETS_FILE = os.getenv("GOOGLE_API_CREDENTIALS_PATH")
-        self.SCOPES = [
-            'https://www.googleapis.com/auth/drive'
-        ]
-        self.service = self._authenticate()
+    def __init__(self, auth: GoogleServiceAuth):
+        self.service = self._authenticate(auth)
 
-    def _authenticate(self):
-        """Authenticate and create the Google Drive API service object."""
-        flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-            self.CLIENT_SECRETS_FILE, self.SCOPES)
-        credentials = flow.run_local_server(port=0)
-        return googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+    def _authenticate(self, auth: GoogleServiceAuth):
+        """Authenticate and create the Google Drive API service object using provided auth."""
+        creds = auth.authenticate()
+        return googleapiclient.discovery.build('drive', 'v3', credentials=creds)
 
     def get_folder_id(self, folder_name):
         """Get the folder ID by its name."""
@@ -51,6 +42,21 @@ class GoogleDriveHandler:
             for item in items:
                 print(f"{item['name']} (ID: {item['id']})")
 
+    def list_root_files(self):
+        """List all files and folders in the root of Google Drive."""
+        results = self.service.files().list(
+            fields="nextPageToken, files(id, name, mimeType)",
+            pageSize=100  # You can adjust the size to list more or fewer files
+        ).execute()
+
+        items = results.get('files', [])
+        if not items:
+            print('No files found in the root directory.')
+        else:
+            print('Files and folders in the root directory:')
+            for item in items:
+                print(f"{item['name']} (ID: {item['id']}, Type: {item['mimeType']})")
+
     def download_file(self, file_id, destination):
         """Download a file from Google Drive."""
         request = self.service.files().get_media(fileId=file_id)
@@ -64,12 +70,11 @@ class GoogleDriveHandler:
 
 # Usage example
 if __name__ == "__main__":
-    drive_handler = GoogleDriveHandler()
+    auth = GoogleServiceAuth()
+    drive_handler = GoogleDriveHandler(auth)
+
+    # List files in the root directory of Google Drive
+    drive_handler.list_root_files()
 
     # List files in the "Time.Graphics" folder on Google Drive
-    drive_handler.list_files_in_folder("Time.Graphics")
-
-    # Download a specific file (replace with actual file ID and destination)
-    # file_id = 'your-file-id'
-    # destination = 'path/to/destination.xlsx'
-    # drive_handler.download_file(file_id, destination)
+   # drive_handler.list_files_in_folder("Time.Graphics")

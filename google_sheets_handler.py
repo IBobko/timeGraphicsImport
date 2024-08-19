@@ -1,27 +1,16 @@
-import os
-
-import google_auth_oauthlib.flow
+from google_service_auth import GoogleServiceAuth
 import googleapiclient.discovery
-from dotenv import load_dotenv
 
 
 class GoogleSheetsHandler:
-    def __init__(self, spreadsheet_id):
-        load_dotenv()
-        self.CLIENT_SECRETS_FILE = os.getenv("GOOGLE_API_CREDENTIALS_PATH")
+    def __init__(self, auth: GoogleServiceAuth, spreadsheet_id):
         self.SPREADSHEET_ID = spreadsheet_id
-        self.SCOPES = [
-            'https://www.googleapis.com/auth/spreadsheets',
-            'https://www.googleapis.com/auth/drive'
-        ]
-        self.service = self._authenticate()
+        self.service = self._authenticate(auth)
 
-    def _authenticate(self):
-        """Authenticate and create the Google Sheets API service object."""
-        flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-            self.CLIENT_SECRETS_FILE, self.SCOPES)
-        credentials = flow.run_local_server(port=0)
-        return googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
+    def _authenticate(self, auth: GoogleServiceAuth):
+        """Authenticate and create the Google Sheets API service object using provided auth."""
+        creds = auth.authenticate()
+        return googleapiclient.discovery.build('sheets', 'v4', credentials=creds)
 
     def read_data(self, range_name):
         """Read data from a specified range in the Google Sheets document."""
@@ -159,20 +148,16 @@ class GoogleSheetsHandler:
 
 # Usage example
 if __name__ == "__main__":
+    auth = GoogleServiceAuth()
     spreadsheet_id = '1zkl-E_xhupjfUbWbJU-4iHWdxvoOMBklOm4-gyg5cAg'
 
-    sheets_handler = GoogleSheetsHandler(spreadsheet_id)
+    sheets_handler = GoogleSheetsHandler(auth, spreadsheet_id)
 
-    sheets_handler.list_excel_files();
+    # List Excel files in the user's Google Drive
+    sheets_handler.list_excel_files()
 
-    # Example 1: Reading data
+    # Examples
     # sheets_handler.read_data('Sheet1!A1:C2')
-
-    # Clear data from a specific range
     # sheets_handler.clear_data('Sheet1!A4:L')
-
-    # Example 2: Updating data
     # sheets_handler.update_data('Sheet1!B4', ['Updated Description'])
-
-    # Example 3: Adding a new row
     # sheets_handler.append_row('Sheet1!A6', ['2000 1 1', 'New Event', 'New Description'])

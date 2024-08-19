@@ -56,7 +56,7 @@ Replace the path with the actual path to your credentials.json file.
 To run the project, use the appropriate script or command, depending on your use case:
 
 ```bash
-python data_transfer.py import --excel_file_path '/home/nox/Девяностые СССР-РФ.xlsx' --spreadsheet_id '1cWsqTIX1TUR5dQoINP5NhBSV--uHHQaFSbf_RJ'
+python data_transfer.py import --excel_file_path '/home/nox/Девяностые СССР-РФ.xlsx' --spreadsheet_id '1cWsqTIX1TUR5dQoINP5NhBSV--uHHQaFSbf_RJg5omE'
 
 ```
 
