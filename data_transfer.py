@@ -147,6 +147,10 @@ def run_import(args):
     auth = GoogleServiceAuth()
     manager = DataTransferManager(excel_file_path=args.excel_file_path, spreadsheet_id=args.spreadsheet_id, auth=auth)
     manager.clear_google_sheets_range('Sheet1!A4:L')
+    # Transfer data from "Events" sheet in Excel to "Sheet1!A1:C10" in Google Sheets
+    manager.transfer_events_to_sheets()
+    # Transfer data from "Periods" sheet in Excel to "Sheet1!A1:C10" in Google Sheets
+    manager.transfer_periods_to_sheets()
 
 
 def run_compare(args):
