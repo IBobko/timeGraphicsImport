@@ -56,7 +56,7 @@ class GoogleSheetsHandler:
         sheet_id = self.get_sheet_id_by_name(range_name.split('!')[0])
 
         start_row_index = self.get_row_index(range_name)
-        end_row_index = 1000
+        end_row_index = 10000
         start_column_index = self.get_column_index(range_name)
         end_column_index = 1000
 
