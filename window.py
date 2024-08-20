@@ -19,22 +19,29 @@ def display_files(stdscr, files):
         stdscr.getch()
 
 
-
 def main(stdscr):
     curses.curs_set(0)
     stdscr.clear()
-    stdscr.refresh()
+
+    h, w = stdscr.getmaxyx()
+    status_win = curses.newwin(1, w, h-1, 0)  # Создаём окно для статуса внизу экрана
+    status_message = "Ready. Select an option."
+
+    def update_status_window(message):
+        """Update the status message in the status window."""
+        status_win.clear()  # Очищаем только статусное окно
+        status_win.addstr(0, 0, message)
+        status_win.refresh()
+
+    update_status_window(status_message)  # Первоначальное обновление статусного сообщения
 
     auth = GoogleServiceAuth()
     drive_handler = GoogleDriveHandler(auth)
-
-    # Меню
     menu = ["Authorize OAuth", "List Root Files", "Exit"]
     current_row = 0
 
     def print_menu():
         stdscr.clear()
-        h, w = stdscr.getmaxyx()
         for idx, item in enumerate(menu):
             x = w // 2 - len(item) // 2
             y = h // 2 - len(menu) // 2 + idx
@@ -46,6 +53,7 @@ def main(stdscr):
                 else:
                     stdscr.addstr(y, x, item)
         stdscr.refresh()
+        update_status_window(status_message)
 
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
     auth2 = None
@@ -56,17 +64,23 @@ def main(stdscr):
 
         if key == curses.KEY_UP and current_row > 0:
             current_row -= 1
+            status_message = "Moving up in menu..."
         elif key == curses.KEY_DOWN and current_row < len(menu) - 1:
             current_row += 1
+            status_message = "Moving down in menu..."
         elif key == curses.KEY_ENTER or key in [10, 13]:
             if current_row == 0:  # Authorize OAuth
+                status_message = "Authenticating with OAuth..."
                 stdscr.clear()
-                auth2 = GoogleOAuthAuth()
-                auth2.authenticate()
+                if auth2 is None:
+                    auth2 = GoogleOAuthAuth()
+                    auth2.authenticate()
+                status_message = "OAuth authorization complete."
                 stdscr.addstr(10, 10, "OAuth authorization complete. Press any key to continue...")
                 stdscr.refresh()
                 stdscr.getch()
             elif current_row == 1:  # List Root Files
+                status_message = "Listing root files..."
                 stdscr.clear()
                 files = []
                 if auth2 is not None:
@@ -75,12 +89,11 @@ def main(stdscr):
                 else:
                     files = drive_handler.get_root_files_list()
                 display_files(stdscr, files)
-                h, w = stdscr.getmaxyx()
-                if h > 21:
-                    stdscr.addstr(h - 1, 10, "Press any key to continue...")
+                status_message = "Displayed root files."
                 stdscr.refresh()
                 stdscr.getch()
             elif current_row == 2:  # Exit
+                status_message = "Exiting..."
                 break
 
 
