@@ -1,15 +1,16 @@
 import googleapiclient.discovery
 
-from auth.google_service_auth import GoogleServiceAuth
+from auth.base_auth import BaseAuth
 
 
 class GoogleDriveHandler:
-    def __init__(self, auth: GoogleServiceAuth):
-        self.service = self._authenticate(auth)
+    def __init__(self, auth_param: BaseAuth):
+        self.service = self._authenticate(auth_param)
 
-    def _authenticate(self, auth: GoogleServiceAuth):
+    @staticmethod
+    def _authenticate(auth_param: BaseAuth):
         """Authenticate and create the Google Drive API service object using provided auth."""
-        creds = auth.authenticate()
+        creds = auth_param.authenticate()
         return googleapiclient.discovery.build('drive', 'v3', credentials=creds)
 
     def get_folder_id(self, folder_name):
@@ -43,20 +44,25 @@ class GoogleDriveHandler:
             for item in items:
                 print(f"{item['name']} (ID: {item['id']})")
 
-    def list_root_files(self):
-        """List all files and folders in the root of Google Drive."""
-        results = self.service.files().list(
-            fields="nextPageToken, files(id, name, mimeType)",
-            pageSize=100  # You can adjust the size to list more or fewer files
-        ).execute()
-
-        items = results.get('files', [])
+    @staticmethod
+    def print_files_list(items):
+        """Print details of files and folders in the provided list."""
         if not items:
             print('No files found in the root directory.')
         else:
             print('Files and folders in the root directory:')
             for item in items:
                 print(f"{item['name']} (ID: {item['id']}, Type: {item['mimeType']})")
+
+    def get_root_files_list(self):
+        """Retrieve a list of all files and folders in the root of Google Drive."""
+        results = self.service.files().list(
+            fields="nextPageToken, files(id, name, mimeType)",
+            pageSize=100  # You can adjust the size to list more or fewer files
+        ).execute()
+
+        items = results.get('files', [])
+        return items
 
     def download_file(self, file_id, destination):
         """Download a file from Google Drive."""

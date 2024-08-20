@@ -1,11 +1,13 @@
+import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from dotenv import load_dotenv
-import os
+from .base_auth import BaseAuth
 
 
-class GoogleServiceAuth:
+class GoogleServiceAuth(BaseAuth):
     def __init__(self):
+        super().__init__()
         load_dotenv()
         self.service_creds_file = os.getenv("GOOGLE_API_SERVICE_CREDENTIALS_PATH")
         if not self.service_creds_file or not os.path.exists(self.service_creds_file):
@@ -15,8 +17,8 @@ class GoogleServiceAuth:
             'https://www.googleapis.com/auth/drive'
         ]
 
-    def authenticate(self):
-        """Authenticate and return a Google API service client."""
+    def perform_authentication(self):
+        """Specific authentication logic for Google Service Account."""
         creds = ServiceAccountCredentials.from_json_keyfile_name(self.service_creds_file, self.scope)
         return creds
 

@@ -1,9 +1,13 @@
 import argparse
 
+from auth.google_oauth_auth import GoogleOAuthAuth
 from auth.google_service_auth import GoogleServiceAuth
 from data_transfer.data_transfer_manager import DataTransferManager
 from data_transfer.google_drive_handler import GoogleDriveHandler
 from utils import clean_filename
+
+
+AUTH = None
 
 
 def run_import(args):
@@ -22,7 +26,7 @@ def run_compare(args):
 
 def run_create_sheet(args):
     auth = GoogleServiceAuth()
-    manager = GoogleDriveHandler(auth=auth)
+    manager = GoogleDriveHandler(auth_param=auth)
     clean_name = clean_filename(args.filename)
     file_name = f"{clean_name}Time.Graphics"
     existing_file_id = manager.find_file_by_name(file_name)
@@ -37,8 +41,28 @@ def run_create_sheet(args):
 
 def run_delete_sheet(args):
     auth = GoogleServiceAuth()
-    manager = GoogleDriveHandler(auth=auth)
+    manager = GoogleDriveHandler(auth_param=auth)
     manager.delete_file(args.file_id)
+
+
+def run_oauth_login(args):
+    global AUTH
+    AUTH = GoogleOAuthAuth()
+    credentials = AUTH.authenticate()
+
+    if credentials:
+        print("OAuth authentication successful.")
+    else:
+        print("OAuth authentication failed.")
+
+
+def run_list_drive(args):
+    print("No OAuth authentication.222")
+    # if AUTH is not None:
+    #     manager = GoogleDriveHandler(auth_param=AUTH)
+    #     manager.list_root_files()
+    # else:
+    #     print("No OAuth authentication.")
 
 
 def main():
@@ -64,6 +88,12 @@ def main():
     create_sheet_parser = subparsers.add_parser('deleteSheet', help='Delete a sheet in Google Drive')
     create_sheet_parser.add_argument("--file_id", required=True, help="file id")
     create_sheet_parser.set_defaults(func=run_delete_sheet)
+
+    oauth_login_parser = subparsers.add_parser('oauthLogin', help='Authenticate using OAuth')
+    oauth_login_parser.set_defaults(func=run_oauth_login)
+
+    create_sheet_parser = subparsers.add_parser('list', help='List Google Drive')
+    create_sheet_parser.set_defaults(func=run_list_drive)
 
     args = parser.parse_args()
     if hasattr(args, 'func'):
